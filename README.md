@@ -9,3 +9,5 @@ Dataset:
 1. https://universe.roboflow.com/peter-vala-eodzc/plates-7wtgj
 
 2. https://universe.roboflow.com/maddi-w3masterio-tech-gmail-com/alpr-2-vlr0h/dataset/1
+
+3. https://universe.roboflow.com/ru-anrp/russian-license-plates-detector
