@@ -1,6 +1,6 @@
-train: ../dataset2/train/images
-val:  ../dataset2/valid/images
-test: ../dataset2/test/images
+train: dataset\train\images
+val:  dataset\valid\images
+test: dataset\test\images
 
 nc: 1
 names: ["lp"]
