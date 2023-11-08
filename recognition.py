@@ -1,48 +1,31 @@
 from ultralytics import YOLO
 import cv2
-from pathlib import Path
-import sys
 import numpy as np
-import util
-from sort.sort import *
-from util import get_car, read_license_plate, write_csv
+from util import read_license_plate
 import os
+import easyocr
 os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
 
-dir = Path(__file__).parents[1]
-sys.path.append(str(dir))
-
-results = {}
-
-mot_tracker = Sort()
-
-# load models
-model = YOLO('yolov8n.pt')
 license_plate_detector = YOLO('runs\\detect\\train8\\weights\\best.pt')
-image = cv2.imread("testimages\\7.jpg")
+image = cv2.imread("testimages\\1cropped.jpg")
 
 if __name__ == '__main__':
-    vehicles = [2, 3, 5, 7]
 
-    detections = license_plate_detector(image, device = 0, stream = True)
-    detections_ = []
-    for detection in detections.boxes.data.tolist():
-        x1, y1, x2, y2, score, class_id = detection
-        detections_.append([x1, y1, x2, y2, score])
+    detections = license_plate_detector(image, device=0, stream = True)
 
-        track_ids = mot_tracker.update(np.asarray(detections_))
+    for idx, detection in enumerate(detections):
+        boxes = detection.boxes.cpu().numpy()
+        x1, y1, x2, y2, score, class_id = boxes.data[0]
 
-        license_plates = license_plate_detector(image)[0]
-        for license_plate in license_plates.boxes.data.tolist():
+        license_plate_crop = image[int(y1):int(y2), int(x1): int(x2), :]
+        license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop)
 
-            x1, y1, x2, y2, score, class_id = license_plate
-            xcar1, ycar1, xcar2, ycar2, car_id = get_car(license_plate, track_ids)
-            license_plate_crop = image[int(y1):int(y2), int(x1): int(x2), :]
-            license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY)
-            _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_gray, 64, 255, cv2.THRESH_BINARY_INV)
-            license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
+    rect_start = (x1, y1)
+    rect_end = (x2, y2)
 
-            if license_plate_text is not None:
-                results[car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]}, 'license_plate': {'bbox': [x1, y1, x2, y2],'text': license_plate_text,'bbox_score': score,'text_score': license_plate_text_score}}
+    #image = cv2.rectangle(image, rect_start, rect_end, (0, 0, 255), 2)
+    #image = cv2.putText(image, license_plate_text, (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2) 
 
-    write_csv(results, './test.csv')
+    cv2.imshow('Result Image', license_plate_crop)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
