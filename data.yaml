@@ -1,6 +1,6 @@
-train: dataset3\train\images
-val:  dataset3\valid\images
-test: dataset3\test\images
+train: C:\Users\Acer\Desktop\New folder\data\train\images
+val:  C:\Users\Acer\Desktop\New folder\data\valid\images
+test: C:\Users\Acer\Desktop\New folder\data\test\images
 
 nc: 1
 names: ["lp"]
